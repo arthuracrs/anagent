@@ -1,0 +1,23 @@
+{
+  "name": "anagent",
+  "version": "0.1.0",
+  "description": "Project-local Claude agent runner",
+  "bin": {
+    "anagent": "./dist/cli.js"
+  },
+  "main": "./dist/runner.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/cli.ts",
+    "start": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.0"
+  }
+}
