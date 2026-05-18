@@ -6,6 +6,8 @@ import type { AgentResult } from '../agents/base.js'
 export interface RunRecord {
   timestamp: string
   agent: string
+  runtime: string
+  mode: 'headless' | 'tmux'
   inputHash: string
   input: string
   raw: string

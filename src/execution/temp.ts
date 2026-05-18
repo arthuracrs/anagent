@@ -1,0 +1,37 @@
+import fs from 'fs'
+import os from 'os'
+import path from 'path'
+import crypto from 'crypto'
+
+export interface TempFiles {
+  id: string
+  syspromptPath: string
+  inputPath: string
+  scriptPath: string
+}
+
+export function createTempFiles(systemPrompt: string, input: string, snippet: string): TempFiles {
+  const id = crypto.randomBytes(6).toString('hex')
+  const tmpDir = os.tmpdir()
+  const syspromptPath = path.join(tmpDir, `anagent-sys-${id}.txt`)
+  const inputPath = path.join(tmpDir, `anagent-in-${id}.txt`)
+  const scriptPath = path.join(tmpDir, `anagent-run-${id}.sh`)
+
+  fs.writeFileSync(syspromptPath, systemPrompt, 'utf8')
+  fs.writeFileSync(inputPath, input, 'utf8')
+  fs.writeFileSync(scriptPath, [
+    '#!/bin/bash',
+    `SYSPROMPT=$(cat "${syspromptPath}")`,
+    `INPUT=$(cat "${inputPath}")`,
+    snippet,
+  ].join('\n'), 'utf8')
+  fs.chmodSync(scriptPath, '755')
+
+  return { id, syspromptPath, inputPath, scriptPath }
+}
+
+export function cleanupTempFiles(files: TempFiles): void {
+  for (const f of [files.syspromptPath, files.inputPath, files.scriptPath]) {
+    try { fs.unlinkSync(f) } catch { /* ok */ }
+  }
+}

@@ -2,6 +2,7 @@
 import { Command } from 'commander'
 import { runAgent } from './runner.js'
 import { listAgents } from './agents/registry.js'
+import { listRuntimes } from './runtimes/registry.js'
 import { resolveAnagentDir, initAnagentDir } from './state/storage.js'
 import { loadRuns } from './state/runs.js'
 
@@ -16,7 +17,9 @@ program
   .option('--stdin', 'Read input from stdin instead of argument')
   .option('--json', 'Output result as JSON')
   .option('--cwd <dir>', 'Working directory for the agent (default: current directory)')
-  .action(async (agentName: string, inputArg: string | undefined, opts: { stdin?: boolean; json?: boolean; cwd?: string }) => {
+  .option('--runtime <id>', 'Runtime to use (default: claude-code)')
+  .option('--mode <mode>', 'Execution mode: headless | tmux')
+  .action(async (agentName: string, inputArg: string | undefined, opts: { stdin?: boolean; json?: boolean; cwd?: string; runtime?: string; mode?: string }) => {
     try {
       let input: string
       if (opts.stdin) {
@@ -29,7 +32,8 @@ program
       }
 
       const cwd = opts.cwd ?? process.cwd()
-      const result = await runAgent(agentName, input, cwd)
+      const mode = opts.mode as 'headless' | 'tmux' | undefined
+      const result = await runAgent(agentName, input, { runtime: opts.runtime, mode, cwd })
 
       if (opts.json) {
         console.log(JSON.stringify(result))
@@ -73,6 +77,15 @@ program
     for (const r of runs) {
       const icon = r.result.verdict === 'APPROVED' ? '✓' : '✗'
       console.log(`${icon} [${r.timestamp}] ${r.agent}: ${r.result.reason}`)
+    }
+  })
+
+program
+  .command('runtimes')
+  .description('List available runtimes')
+  .action(() => {
+    for (const rt of listRuntimes()) {
+      console.log(`  ${rt.id.padEnd(16)} ${rt.name.padEnd(16)} default: ${rt.defaultMode}  — ${rt.description}`)
     }
   })
 
