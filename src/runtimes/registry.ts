@@ -4,7 +4,7 @@ const claudeCode: RuntimeDefinition = {
   id: 'claude-code',
   name: 'Claude Code',
   description: 'Anthropic Claude Code CLI',
-  defaultMode: 'headless',
+  defaultMode: 'tmux',
   headlessSnippet: 'claude --dangerously-skip-permissions --system-prompt "$SYSPROMPT" -p "$INPUT"',
   tmuxSnippet: 'claude --dangerously-skip-permissions --system-prompt "$SYSPROMPT" "$INPUT"',
 }

@@ -20,9 +20,13 @@ The system prompt and output parsing are the responsibility of the calling appli
 ## Installation
 
 ```bash
-npm install
-npm run build
-npm link          # makes `anagent` available globally
+npx github:arthuracrs/anagent <command>
+```
+
+Or install globally:
+
+```bash
+npm install -g github:arthuracrs/anagent
 ```
 
 ## Quick start
