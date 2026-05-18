@@ -30,8 +30,8 @@ For `claude-code`, anagent reads from Claude Code's local session JSONL (`~/.cla
 ## Prerequisites
 
 - Node.js 18+
-- `claude` CLI in PATH (for the `claude-code` runtime) — [install Claude Code](https://docs.anthropic.com/en/docs/claude-code)
-- `tmux` installed if you use `--mode tmux`
+- `tmux` installed
+- The CLI for whichever runtime you use (e.g. `claude` for `claude-code`)
 
 ## Installation
 
