@@ -6,7 +6,7 @@ const claudeCode: RuntimeDefinition = {
   description: 'Anthropic Claude Code CLI',
   defaultMode: 'tmux',
   headlessSnippet: 'claude --dangerously-skip-permissions --system-prompt "$SYSPROMPT" -p "$INPUT"',
-  tmuxSnippet: 'claude --dangerously-skip-permissions --system-prompt "$SYSPROMPT" "$INPUT"',
+  tmuxSnippet: 'claude --dangerously-skip-permissions --system-prompt "$SYSPROMPT" --session-id "$SESSION_ID" "$INPUT"',
 }
 
 const cursor: RuntimeDefinition = {

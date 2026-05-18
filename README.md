@@ -11,6 +11,17 @@ A project-local CLI for running AI coding agents against your codebase. Give it 
 
 The system prompt and output parsing are the responsibility of the calling application.
 
+## How it works
+
+Each runtime runs in **interactive mode** through a tmux session (which provides a real terminal, satisfying tools like Claude Code that refuse to run without one). After the process finishes, anagent reads the output and returns it.
+
+For `claude-code` specifically, anagent reads from Claude Code's local session JSONL file (`~/.claude/projects/**/<session-id>.jsonl`) instead of scraping the terminal. This matters because terminal capture is lossy — cursor redraws and spinner animations can corrupt the captured text. The JSONL file is Claude Code's own lossless record of the conversation. Terminal capture is kept as a fallback for runtimes that don't produce a JSONL file.
+
+This design means:
+- You use your existing Claude Code subscription session, not the API
+- If Anthropic changes or restricts `claude -p` (the headless/API path), anagent is unaffected because it uses the interactive mode
+- Swapping to a different tool (Codex, Cursor, etc.) only requires changing the runtime in anagent — the apps calling anagent stay the same
+
 ## Prerequisites
 
 - Node.js 18+

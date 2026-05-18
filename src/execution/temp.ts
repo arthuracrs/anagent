@@ -5,6 +5,7 @@ import crypto from 'crypto'
 
 export interface TempFiles {
   id: string
+  sessionId: string
   syspromptPath: string
   inputPath: string
   scriptPath: string
@@ -12,6 +13,7 @@ export interface TempFiles {
 
 export function createTempFiles(systemPrompt: string, input: string, snippet: string): TempFiles {
   const id = crypto.randomBytes(6).toString('hex')
+  const sessionId = crypto.randomUUID()
   const tmpDir = os.tmpdir()
   const syspromptPath = path.join(tmpDir, `anagent-sys-${id}.txt`)
   const inputPath = path.join(tmpDir, `anagent-in-${id}.txt`)
@@ -23,11 +25,12 @@ export function createTempFiles(systemPrompt: string, input: string, snippet: st
     '#!/bin/bash',
     `SYSPROMPT=$(cat "${syspromptPath}")`,
     `INPUT=$(cat "${inputPath}")`,
+    `SESSION_ID="${sessionId}"`,
     snippet,
   ].join('\n'), 'utf8')
   fs.chmodSync(scriptPath, '755')
 
-  return { id, syspromptPath, inputPath, scriptPath }
+  return { id, sessionId, syspromptPath, inputPath, scriptPath }
 }
 
 export function cleanupTempFiles(files: TempFiles): void {

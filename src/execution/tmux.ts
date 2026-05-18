@@ -2,6 +2,7 @@ import { execFile } from 'child_process'
 import { promisify } from 'util'
 import type { RuntimeDefinition } from '../runtimes/base.js'
 import { createTempFiles, cleanupTempFiles } from './temp.js'
+import { readSessionOutput } from './jsonl.js'
 
 const execFileAsync = promisify(execFile)
 
@@ -27,6 +28,10 @@ export async function runTmux(runtime: RuntimeDefinition, systemPrompt: string, 
       if (stdout.trim() === '1') break
       if (i === 119) throw new Error('Agent timed out after 60 seconds')
     }
+
+    // Prefer session JSONL (lossless) over terminal capture
+    const jsonlOutput = await readSessionOutput(files.sessionId)
+    if (jsonlOutput) return jsonlOutput
 
     const { stdout: output } = await execFileAsync('tmux', [
       'capture-pane', '-p', '-t', sessionName, '-S', '-500',
