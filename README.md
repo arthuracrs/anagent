@@ -21,6 +21,12 @@ anagent launches the runtime in **interactive mode** inside a tmux session, whic
 
 For `claude-code`, anagent reads from Claude Code's local session JSONL (`~/.claude/projects/**/<session-id>.jsonl`) instead of scraping the terminal. Terminal capture is lossy — cursor redraws and spinner animations can corrupt the text. The JSONL is Claude Code's own lossless record of the session and is used as the source of truth. Terminal capture is kept as a fallback for runtimes that don't produce one.
 
+## Configuration
+
+| Env var | Default | Description |
+|---|---|---|
+| `ANAGENT_RUNTIME` | `claude-code` | Runtime to use when `--runtime` is not passed |
+
 ## Prerequisites
 
 - Node.js 18+
