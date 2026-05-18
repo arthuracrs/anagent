@@ -16,12 +16,5 @@ export function resolveAnagentDir(from: string = process.cwd()): string {
 }
 
 export function initAnagentDir(dir: string): void {
-  fs.mkdirSync(path.join(dir, 'prompts'), { recursive: true })
   fs.mkdirSync(path.join(dir, 'runs'), { recursive: true })
-}
-
-export function readPromptOverride(dir: string, agentName: string): string | null {
-  const file = path.join(dir, 'prompts', `${agentName}.md`)
-  if (!fs.existsSync(file)) return null
-  return fs.readFileSync(file, 'utf8').trim()
 }

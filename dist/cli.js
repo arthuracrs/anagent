@@ -1,22 +1,30 @@
 #!/usr/bin/env node
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const commander_1 = require("commander");
+const fs_1 = __importDefault(require("fs"));
 const runner_js_1 = require("./runner.js");
-const registry_js_1 = require("./agents/registry.js");
+const registry_js_1 = require("./runtimes/registry.js");
 const storage_js_1 = require("./state/storage.js");
 const runs_js_1 = require("./state/runs.js");
 const program = new commander_1.Command()
     .name('anagent')
-    .description('Project-local Claude agent runner')
+    .description('Project-local AI agent runner')
     .version('0.1.0');
 program
-    .command('run <agent> [input]')
+    .command('run [input]')
     .description('Run an agent with the given input')
     .option('--stdin', 'Read input from stdin instead of argument')
     .option('--json', 'Output result as JSON')
+    .option('--system-prompt <text>', 'System prompt string')
+    .option('--prompt-file <path>', 'Read system prompt from file')
     .option('--cwd <dir>', 'Working directory for the agent (default: current directory)')
-    .action(async (agentName, inputArg, opts) => {
+    .option('--runtime <id>', 'Runtime to use (default: claude-code)')
+    .option('--mode <mode>', 'Execution mode: headless | tmux')
+    .action(async (inputArg, opts) => {
     try {
         let input;
         if (opts.stdin) {
@@ -29,16 +37,22 @@ program
             console.error('Error: provide input as argument or use --stdin');
             process.exit(2);
         }
+        let systemPrompt;
+        if (opts.promptFile) {
+            systemPrompt = fs_1.default.readFileSync(opts.promptFile, 'utf8').trim();
+        }
+        else if (opts.systemPrompt) {
+            systemPrompt = opts.systemPrompt;
+        }
         const cwd = opts.cwd ?? process.cwd();
-        const result = await (0, runner_js_1.runAgent)(agentName, input, cwd);
+        const mode = opts.mode;
+        const output = await (0, runner_js_1.runAgent)(input, { systemPrompt, runtime: opts.runtime, mode, cwd });
         if (opts.json) {
-            console.log(JSON.stringify(result));
+            console.log(JSON.stringify({ output }));
         }
         else {
-            const icon = result.verdict === 'APPROVED' ? '✓' : result.verdict === 'REJECTED' ? '✗' : 'ℹ';
-            console.log(`${icon} ${result.verdict}: ${result.reason}`);
+            console.log(output);
         }
-        process.exit(result.verdict === 'REJECTED' ? 1 : 0);
     }
     catch (err) {
         console.error(`Error: ${err.message}`);
@@ -46,21 +60,20 @@ program
     }
 });
 program
-    .command('list')
-    .description('List available agents')
+    .command('runtimes')
+    .description('List available runtimes')
     .action(() => {
-    for (const agent of (0, registry_js_1.listAgents)()) {
-        console.log(`  ${agent.name.padEnd(16)} ${agent.description}`);
+    for (const rt of (0, registry_js_1.listRuntimes)()) {
+        console.log(`  ${rt.id.padEnd(16)} ${rt.name.padEnd(16)} default: ${rt.defaultMode}  — ${rt.description}`);
     }
 });
 program
     .command('runs')
     .description('Show run history')
-    .option('--agent <name>', 'Filter by agent name')
     .option('--json', 'Output as JSON')
     .action((opts) => {
     const dir = (0, storage_js_1.resolveAnagentDir)();
-    const runs = (0, runs_js_1.loadRuns)(dir, opts.agent);
+    const runs = (0, runs_js_1.loadRuns)(dir);
     if (opts.json) {
         console.log(JSON.stringify(runs, null, 2));
         return;
@@ -70,8 +83,7 @@ program
         return;
     }
     for (const r of runs) {
-        const icon = r.result.verdict === 'APPROVED' ? '✓' : '✗';
-        console.log(`${icon} [${r.timestamp}] ${r.agent}: ${r.result.reason}`);
+        console.log(`[${r.timestamp}] ${r.runtime}/${r.mode}: ${r.input.slice(0, 60)}`);
     }
 });
 program
@@ -81,8 +93,7 @@ program
     const dir = (0, storage_js_1.resolveAnagentDir)(process.cwd());
     (0, storage_js_1.initAnagentDir)(dir);
     console.log(`Initialized ${dir}`);
-    console.log('  .anagent/prompts/   ← drop <agent>.md files here to customize prompts');
-    console.log('  .anagent/runs/      ← run history is stored here');
+    console.log('  .anagent/runs/   ← run history is stored here');
 });
 program.parse();
 function readStdin() {

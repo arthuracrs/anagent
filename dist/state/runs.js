@@ -13,16 +13,15 @@ function saveRun(dir, record) {
     const runsDir = path_1.default.join(dir, 'runs');
     fs_1.default.mkdirSync(runsDir, { recursive: true });
     const ts = record.timestamp.replace(/[:.]/g, '-');
-    const file = path_1.default.join(runsDir, `${ts}_${record.agent}_${record.inputHash.slice(0, 8)}.json`);
+    const file = path_1.default.join(runsDir, `${ts}_${record.runtime}_${record.inputHash.slice(0, 8)}.json`);
     fs_1.default.writeFileSync(file, JSON.stringify(record, null, 2));
 }
-function loadRuns(dir, agentFilter) {
+function loadRuns(dir) {
     const runsDir = path_1.default.join(dir, 'runs');
     if (!fs_1.default.existsSync(runsDir))
         return [];
     return fs_1.default.readdirSync(runsDir)
         .filter(f => f.endsWith('.json'))
-        .filter(f => !agentFilter || f.includes(`_${agentFilter}_`))
         .sort()
         .reverse()
         .map(f => JSON.parse(fs_1.default.readFileSync(path_1.default.join(runsDir, f), 'utf8')));

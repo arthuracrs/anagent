@@ -1,2 +1,6 @@
-import type { AgentResult } from './agents/base.js';
-export declare function runAgent(agentName: string, input: string, cwd?: string): Promise<AgentResult>;
+export declare function runAgent(input: string, opts?: {
+    systemPrompt?: string;
+    runtime?: string;
+    mode?: 'headless' | 'tmux';
+    cwd?: string;
+}): Promise<string>;
