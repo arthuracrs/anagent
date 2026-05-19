@@ -29,14 +29,22 @@ export async function runTmux(runtime: RuntimeDefinition, systemPrompt: string, 
 
     while (Date.now() < deadline) {
       await sleep(500)
+
+      // Check if the process exited (headless runtimes)
       const { stdout } = await execFileAsync('tmux', [
         'display-message', '-p', '-t', sessionName, '#{pane_dead}',
       ])
       if (stdout.trim() === '1') break
+
+      // Check JSONL for a completed response (interactive runtimes like claude-code
+      // never exit on their own — they wait for more input)
+      const jsonlOutput = await readSessionOutput(files.sessionId)
+      if (jsonlOutput) return jsonlOutput
+
       if (Date.now() >= deadline) throw new Error(`Agent timed out after ${timeoutMs / 1000}s`)
     }
 
-    // Prefer session JSONL (lossless) over terminal capture
+    // Process exited — try JSONL first, fall back to terminal capture
     const jsonlOutput = await readSessionOutput(files.sessionId)
     if (jsonlOutput) return jsonlOutput
 

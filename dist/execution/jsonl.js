@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.extractFromJsonl = extractFromJsonl;
 exports.readSessionOutput = readSessionOutput;
 const fs_1 = __importDefault(require("fs"));
 const os_1 = __importDefault(require("os"));
@@ -32,33 +33,38 @@ function extractText(content) {
         .join('')
         .trim();
 }
+function extractFromJsonl(content) {
+    let lastText = null;
+    for (const line of content.split('\n')) {
+        const trimmed = line.trim();
+        if (!trimmed)
+            continue;
+        try {
+            const event = JSON.parse(trimmed);
+            if (event.type !== 'assistant')
+                continue;
+            const msg = event.message;
+            if (!msg)
+                continue;
+            const stopReason = msg.stop_reason;
+            if (!stopReason || NON_TERMINAL_STOP_REASONS.has(stopReason))
+                continue;
+            const text = extractText(msg.content);
+            if (text)
+                lastText = text;
+        }
+        catch { /* skip malformed lines */ }
+    }
+    return lastText;
+}
 function readJsonlText(filePath) {
     let lastText = null;
     try {
-        const lines = fs_1.default.readFileSync(filePath, 'utf8').split('\n');
-        for (const line of lines) {
-            const trimmed = line.trim();
-            if (!trimmed)
-                continue;
-            try {
-                const event = JSON.parse(trimmed);
-                if (event.type !== 'assistant')
-                    continue;
-                const msg = event.message;
-                if (!msg)
-                    continue;
-                const stopReason = msg.stop_reason;
-                if (!stopReason || NON_TERMINAL_STOP_REASONS.has(stopReason))
-                    continue;
-                const text = extractText(msg.content);
-                if (text)
-                    lastText = text;
-            }
-            catch { /* skip malformed lines */ }
-        }
+        return extractFromJsonl(fs_1.default.readFileSync(filePath, 'utf8'));
     }
-    catch { /* file unreadable */ }
-    return lastText;
+    catch {
+        return null;
+    }
 }
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

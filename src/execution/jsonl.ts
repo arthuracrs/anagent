@@ -26,26 +26,30 @@ function extractText(content: unknown): string {
     .trim()
 }
 
+export function extractFromJsonl(content: string): string | null {
+  let lastText: string | null = null
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim()
+    if (!trimmed) continue
+    try {
+      const event = JSON.parse(trimmed) as Record<string, unknown>
+      if (event.type !== 'assistant') continue
+      const msg = event.message as Record<string, unknown> | undefined
+      if (!msg) continue
+      const stopReason = msg.stop_reason as string | undefined
+      if (!stopReason || NON_TERMINAL_STOP_REASONS.has(stopReason)) continue
+      const text = extractText(msg.content)
+      if (text) lastText = text
+    } catch { /* skip malformed lines */ }
+  }
+  return lastText
+}
+
 function readJsonlText(filePath: string): string | null {
   let lastText: string | null = null
   try {
-    const lines = fs.readFileSync(filePath, 'utf8').split('\n')
-    for (const line of lines) {
-      const trimmed = line.trim()
-      if (!trimmed) continue
-      try {
-        const event = JSON.parse(trimmed) as Record<string, unknown>
-        if (event.type !== 'assistant') continue
-        const msg = event.message as Record<string, unknown> | undefined
-        if (!msg) continue
-        const stopReason = msg.stop_reason as string | undefined
-        if (!stopReason || NON_TERMINAL_STOP_REASONS.has(stopReason)) continue
-        const text = extractText(msg.content)
-        if (text) lastText = text
-      } catch { /* skip malformed lines */ }
-    }
-  } catch { /* file unreadable */ }
-  return lastText
+    return extractFromJsonl(fs.readFileSync(filePath, 'utf8'))
+  } catch { return null }
 }
 
 function sleep(ms: number): Promise<void> {
