@@ -26,6 +26,7 @@ For `claude-code`, anagent reads from Claude Code's local session JSONL (`~/.cla
 | Env var | Default | Description |
 |---|---|---|
 | `ANAGENT_RUNTIME` | `claude-code` | Runtime to use when `--runtime` is not passed |
+| `ANAGENT_TIMEOUT_SEC` | `600` | Timeout in seconds (also settable with `--timeout`) |
 
 ## Prerequisites
 
@@ -33,32 +34,35 @@ For `claude-code`, anagent reads from Claude Code's local session JSONL (`~/.cla
 - `tmux` installed
 - The CLI for whichever runtime you use (e.g. `claude` for `claude-code`)
 
-## Installation
+## Usage
+
+No installation needed:
+
+```bash
+npx github:arthuracrs/anagent run "your task here"
+```
+
+Or install globally for repeated use:
 
 ```bash
 npm install -g github:arthuracrs/anagent
-```
-
-To update:
-
-```bash
-npm uninstall -g anagent && npm install -g github:arthuracrs/anagent
+# to update: npm uninstall -g anagent && npm install -g github:arthuracrs/anagent
 ```
 
 ## Quick start
 
 ```bash
 # Run with an inline system prompt
-anagent run "fix the null pointer in UserService" --system-prompt "You are a developer agent."
+npx github:arthuracrs/anagent run "fix the null pointer in UserService" --system-prompt "You are a developer agent."
 
 # Load system prompt from a file
-anagent run "review the payment flow" --prompt-file ./prompts/reviewer.md
+npx github:arthuracrs/anagent run "review the payment flow" --prompt-file ./prompts/reviewer.md
 
 # Pipe input via stdin
-git diff | anagent run --stdin --prompt-file ./prompts/reviewer.md
+git diff | npx github:arthuracrs/anagent run --stdin --prompt-file ./prompts/reviewer.md
 
 # See available runtimes
-anagent runtimes
+npx github:arthuracrs/anagent runtimes
 ```
 
 ## Commands

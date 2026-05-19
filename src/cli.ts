@@ -21,7 +21,8 @@ program
   .option('--cwd <dir>', 'Working directory for the agent (default: current directory)')
   .option('--runtime <id>', 'Runtime to use (default: claude-code)')
   .option('--mode <mode>', 'Execution mode: headless | tmux')
-  .action(async (inputArg: string | undefined, opts: { stdin?: boolean; json?: boolean; systemPrompt?: string; promptFile?: string; cwd?: string; runtime?: string; mode?: string }) => {
+  .option('--timeout <seconds>', 'Timeout in seconds (default: 600)')
+  .action(async (inputArg: string | undefined, opts: { stdin?: boolean; json?: boolean; systemPrompt?: string; promptFile?: string; cwd?: string; runtime?: string; mode?: string; timeout?: string }) => {
     try {
       let input: string
       if (opts.stdin) {
@@ -40,6 +41,7 @@ program
         systemPrompt = opts.systemPrompt
       }
 
+      if (opts.timeout) process.env.ANAGENT_TIMEOUT_SEC = opts.timeout
       const cwd = opts.cwd ?? process.cwd()
       const mode = opts.mode as 'headless' | 'tmux' | undefined
       const output = await runAgent(input, { systemPrompt, runtime: opts.runtime, mode, cwd })

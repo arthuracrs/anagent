@@ -24,6 +24,7 @@ program
     .option('--cwd <dir>', 'Working directory for the agent (default: current directory)')
     .option('--runtime <id>', 'Runtime to use (default: claude-code)')
     .option('--mode <mode>', 'Execution mode: headless | tmux')
+    .option('--timeout <seconds>', 'Timeout in seconds (default: 600)')
     .action(async (inputArg, opts) => {
     try {
         let input;
@@ -44,6 +45,8 @@ program
         else if (opts.systemPrompt) {
             systemPrompt = opts.systemPrompt;
         }
+        if (opts.timeout)
+            process.env.ANAGENT_TIMEOUT_SEC = opts.timeout;
         const cwd = opts.cwd ?? process.cwd();
         const mode = opts.mode;
         const output = await (0, runner_js_1.runAgent)(input, { systemPrompt, runtime: opts.runtime, mode, cwd });

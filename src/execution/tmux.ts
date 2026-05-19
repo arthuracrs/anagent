@@ -10,7 +10,14 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+const DEFAULT_TIMEOUT_MS = 10 * 60 * 1000 // 10 minutes
+
 export async function runTmux(runtime: RuntimeDefinition, systemPrompt: string, input: string, cwd?: string): Promise<string> {
+  const timeoutMs = process.env.ANAGENT_TIMEOUT_SEC
+    ? parseInt(process.env.ANAGENT_TIMEOUT_SEC, 10) * 1000
+    : DEFAULT_TIMEOUT_MS
+  const deadline = Date.now() + timeoutMs
+
   const files = createTempFiles(systemPrompt, input, runtime.tmuxSnippet)
   const sessionName = `anagent-${files.id}`
   try {
@@ -20,13 +27,13 @@ export async function runTmux(runtime: RuntimeDefinition, systemPrompt: string, 
     await execFileAsync('tmux', tmuxArgs)
     await execFileAsync('tmux', ['set-option', '-t', sessionName, 'remain-on-exit', 'on'])
 
-    for (let i = 0; i < 120; i++) {
+    while (Date.now() < deadline) {
       await sleep(500)
       const { stdout } = await execFileAsync('tmux', [
         'display-message', '-p', '-t', sessionName, '#{pane_dead}',
       ])
       if (stdout.trim() === '1') break
-      if (i === 119) throw new Error('Agent timed out after 60 seconds')
+      if (Date.now() >= deadline) throw new Error(`Agent timed out after ${timeoutMs / 1000}s`)
     }
 
     // Prefer session JSONL (lossless) over terminal capture
