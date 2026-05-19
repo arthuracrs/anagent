@@ -84,16 +84,16 @@ Options:
 
 ```bash
 # Headless (default) — captures output, returns when done
-anagent run "add input validation to the signup form" --prompt-file ./dev.md
+npx github:arthuracrs/anagent run "add input validation to the signup form" --prompt-file ./dev.md
 
 # Tmux mode — launches a visible session you can watch
-anagent run "refactor the auth module" --prompt-file ./dev.md --mode tmux
+npx github:arthuracrs/anagent run "refactor the auth module" --prompt-file ./dev.md --mode tmux
 
 # Use Cursor as the runtime
-anagent run "review the payment flow" --prompt-file ./review.md --runtime cursor
+npx github:arthuracrs/anagent run "review the payment flow" --prompt-file ./review.md --runtime cursor
 
 # JSON output for scripting
-git diff HEAD~1 | anagent run --stdin --prompt-file ./validate.md --json
+git diff HEAD~1 | npx github:arthuracrs/anagent run --stdin --prompt-file ./validate.md --json
 ```
 
 ### `anagent runtimes`
