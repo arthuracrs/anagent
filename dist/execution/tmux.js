@@ -1,0 +1,53 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.runTmux = runTmux;
+const child_process_1 = require("child_process");
+const util_1 = require("util");
+const temp_js_1 = require("./temp.js");
+const jsonl_js_1 = require("./jsonl.js");
+const execFileAsync = (0, util_1.promisify)(child_process_1.execFile);
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+async function runTmux(runtime, systemPrompt, input, cwd) {
+    const files = (0, temp_js_1.createTempFiles)(systemPrompt, input, runtime.tmuxSnippet);
+    const sessionName = `anagent-${files.id}`;
+    try {
+        const tmuxArgs = ['new-session', '-d', '-s', sessionName, '-x', '220', '-y', '50'];
+        if (cwd)
+            tmuxArgs.push('-c', cwd);
+        tmuxArgs.push(files.scriptPath);
+        await execFileAsync('tmux', tmuxArgs);
+        await execFileAsync('tmux', ['set-option', '-t', sessionName, 'remain-on-exit', 'on']);
+        for (let i = 0; i < 120; i++) {
+            await sleep(500);
+            const { stdout } = await execFileAsync('tmux', [
+                'display-message', '-p', '-t', sessionName, '#{pane_dead}',
+            ]);
+            if (stdout.trim() === '1')
+                break;
+            if (i === 119)
+                throw new Error('Agent timed out after 60 seconds');
+        }
+        // Prefer session JSONL (lossless) over terminal capture
+        const jsonlOutput = await (0, jsonl_js_1.readSessionOutput)(files.sessionId);
+        if (jsonlOutput)
+            return jsonlOutput;
+        const { stdout: output } = await execFileAsync('tmux', [
+            'capture-pane', '-p', '-t', sessionName, '-S', '-500',
+        ]);
+        return output
+            .split('\n')
+            .map(l => l.trimEnd())
+            .filter(l => !/^Pane is dead/.test(l))
+            .join('\n')
+            .trim();
+    }
+    finally {
+        try {
+            await execFileAsync('tmux', ['kill-session', '-t', sessionName]);
+        }
+        catch { /* already dead */ }
+        (0, temp_js_1.cleanupTempFiles)(files);
+    }
+}
