@@ -7,7 +7,7 @@
   },
   "main": "./dist/runner.js",
   "scripts": {
-    "prepare": "tsc",
+    "prepare": "npx tsc",
     "build": "tsc",
     "dev": "ts-node src/cli.ts",
     "start": "node dist/cli.js"
