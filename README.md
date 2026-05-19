@@ -36,13 +36,13 @@ For `claude-code`, anagent reads from Claude Code's local session JSONL (`~/.cla
 ## Installation
 
 ```bash
-npx github:arthuracrs/anagent <command>
+npm install -g github:arthuracrs/anagent
 ```
 
-Or install globally:
+To update:
 
 ```bash
-npm install -g github:arthuracrs/anagent
+npm uninstall -g anagent && npm install -g github:arthuracrs/anagent
 ```
 
 ## Quick start
