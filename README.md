@@ -100,24 +100,6 @@ git diff HEAD~1 | npx github:arthuracrs/anagent run --stdin --prompt-file ./vali
 
 List available runtimes with their IDs, names, and default modes.
 
-### `anagent runs`
-
-Show the run history for this project.
-
-```
-Options:
-  --json   Output as JSON
-```
-
-### `anagent init`
-
-Initialize a `.anagent/` directory in the current project. Run this once per repo.
-
-```
-.anagent/
-  runs/   ← run history (JSON)
-```
-
 ## Built-in runtimes
 
 | Runtime | Description | Default mode |
