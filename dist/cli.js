@@ -8,8 +8,6 @@ const commander_1 = require("commander");
 const fs_1 = __importDefault(require("fs"));
 const runner_js_1 = require("./runner.js");
 const registry_js_1 = require("./runtimes/registry.js");
-const storage_js_1 = require("./state/storage.js");
-const runs_js_1 = require("./state/runs.js");
 const program = new commander_1.Command()
     .name('anagent')
     .description('Project-local AI agent runner')
@@ -69,34 +67,6 @@ program
     for (const rt of (0, registry_js_1.listRuntimes)()) {
         console.log(`  ${rt.id.padEnd(16)} ${rt.name.padEnd(16)} default: ${rt.defaultMode}  — ${rt.description}`);
     }
-});
-program
-    .command('runs')
-    .description('Show run history')
-    .option('--json', 'Output as JSON')
-    .action((opts) => {
-    const dir = (0, storage_js_1.resolveAnagentDir)();
-    const runs = (0, runs_js_1.loadRuns)(dir);
-    if (opts.json) {
-        console.log(JSON.stringify(runs, null, 2));
-        return;
-    }
-    if (runs.length === 0) {
-        console.log('No runs yet.');
-        return;
-    }
-    for (const r of runs) {
-        console.log(`[${r.timestamp}] ${r.runtime}/${r.mode}: ${r.input.slice(0, 60)}`);
-    }
-});
-program
-    .command('init')
-    .description('Initialize .anagent/ in the current directory')
-    .action(() => {
-    const dir = (0, storage_js_1.resolveAnagentDir)(process.cwd());
-    (0, storage_js_1.initAnagentDir)(dir);
-    console.log(`Initialized ${dir}`);
-    console.log('  .anagent/runs/   ← run history is stored here');
 });
 program.parse();
 function readStdin() {

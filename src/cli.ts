@@ -3,8 +3,6 @@ import { Command } from 'commander'
 import fs from 'fs'
 import { runAgent } from './runner.js'
 import { listRuntimes } from './runtimes/registry.js'
-import { resolveAnagentDir, initAnagentDir } from './state/storage.js'
-import { loadRuns } from './state/runs.js'
 
 const program = new Command()
   .name('anagent')
@@ -64,36 +62,6 @@ program
     for (const rt of listRuntimes()) {
       console.log(`  ${rt.id.padEnd(16)} ${rt.name.padEnd(16)} default: ${rt.defaultMode}  — ${rt.description}`)
     }
-  })
-
-program
-  .command('runs')
-  .description('Show run history')
-  .option('--json', 'Output as JSON')
-  .action((opts: { json?: boolean }) => {
-    const dir = resolveAnagentDir()
-    const runs = loadRuns(dir)
-    if (opts.json) {
-      console.log(JSON.stringify(runs, null, 2))
-      return
-    }
-    if (runs.length === 0) {
-      console.log('No runs yet.')
-      return
-    }
-    for (const r of runs) {
-      console.log(`[${r.timestamp}] ${r.runtime}/${r.mode}: ${r.input.slice(0, 60)}`)
-    }
-  })
-
-program
-  .command('init')
-  .description('Initialize .anagent/ in the current directory')
-  .action(() => {
-    const dir = resolveAnagentDir(process.cwd())
-    initAnagentDir(dir)
-    console.log(`Initialized ${dir}`)
-    console.log('  .anagent/runs/   ← run history is stored here')
   })
 
 program.parse()
