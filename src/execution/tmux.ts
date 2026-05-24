@@ -26,7 +26,7 @@ export async function runTmux(runtime: RuntimeDefinition, systemPrompt: string, 
     tmuxArgs.push(files.scriptPath)
     await execFileAsync('tmux', tmuxArgs)
     await execFileAsync('tmux', ['set-option', '-t', sessionName, 'remain-on-exit', 'on'])
-    console.log(sessionName)
+    console.log(`tmux attach -t ${sessionName}`)
 
     while (Date.now() < deadline) {
       await sleep(500)
