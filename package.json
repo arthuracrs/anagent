@@ -11,6 +11,7 @@
     "test": "node --require ts-node/register --test tests/jsonl.test.ts tests/registry.test.ts",
     "dev": "ts-node src/cli.ts",
     "start": "node dist/cli.js",
+    "prepare": "npm run build",
     "postinstall": "echo '✓ anagent installed. Run \"anagent runtimes\" to see available agents.'"
   },
   "dependencies": {
