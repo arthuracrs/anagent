@@ -7,7 +7,7 @@
   },
   "main": "./dist/runner.js",
   "scripts": {
-    "build": "tsc",
+    "build": "node node_modules/typescript/bin/tsc",
     "test": "node --require ts-node/register --test tests/jsonl.test.ts tests/registry.test.ts",
     "dev": "ts-node src/cli.ts",
     "start": "node dist/cli.js",
