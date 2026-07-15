@@ -1,7 +1,7 @@
 {
   "name": "anagent",
   "version": "0.1.0",
-  "description": "Project-local Claude agent runner",
+  "description": "Project-local AI agent runner",
   "bin": {
     "anagent": "./dist/cli.js"
   },
@@ -10,8 +10,7 @@
     "build": "tsc",
     "test": "node --require ts-node/register --test tests/jsonl.test.ts tests/registry.test.ts",
     "dev": "ts-node src/cli.ts",
-    "start": "node dist/cli.js",
-    "postinstall": "echo '✓ anagent installed. Run \"anagent runtimes\" to see available agents.'"
+    "start": "node dist/cli.js"
   },
   "dependencies": {
     "commander": "^12.1.0"
