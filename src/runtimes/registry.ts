@@ -18,7 +18,16 @@ const cursor: RuntimeDefinition = {
   tmuxSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nagent --force "$FULL"',
 }
 
-const RUNTIMES: RuntimeDefinition[] = [claudeCode, cursor]
+const opencode: RuntimeDefinition = {
+  id: 'opencode',
+  name: 'OpenCode',
+  description: 'OpenCode AI coding agent CLI',
+  defaultMode: 'headless',
+  headlessSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nopencode run --auto "$FULL"',
+  tmuxSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nopencode run --auto "$FULL"',
+}
+
+const RUNTIMES: RuntimeDefinition[] = [claudeCode, cursor, opencode]
 
 export function getRuntime(id: string): RuntimeDefinition | undefined {
   return RUNTIMES.find(r => r.id === id)

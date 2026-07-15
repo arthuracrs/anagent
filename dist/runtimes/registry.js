@@ -18,7 +18,15 @@ const cursor = {
     headlessSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nagent -p --force "$FULL"',
     tmuxSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nagent --force "$FULL"',
 };
-const RUNTIMES = [claudeCode, cursor];
+const opencode = {
+    id: 'opencode',
+    name: 'OpenCode',
+    description: 'OpenCode AI coding agent CLI',
+    defaultMode: 'headless',
+    headlessSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nopencode run --auto "$FULL"',
+    tmuxSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nopencode run --auto "$FULL"',
+};
+const RUNTIMES = [claudeCode, cursor, opencode];
 function getRuntime(id) {
     return RUNTIMES.find(r => r.id === id);
 }
