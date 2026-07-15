@@ -5,7 +5,7 @@ const registry_js_1 = require("./runtimes/registry.js");
 const headless_js_1 = require("./execution/headless.js");
 const tmux_js_1 = require("./execution/tmux.js");
 async function runAgent(input, opts = {}) {
-    const runtimeId = opts.runtime ?? process.env.ANAGENT_RUNTIME ?? 'claude-code';
+    const runtimeId = opts.runtime ?? process.env.ANAGENT_RUNTIME ?? 'opencode';
     const runtime = (0, registry_js_1.getRuntime)(runtimeId);
     if (!runtime)
         throw new Error(`Unknown runtime: "${runtimeId}". Run 'anagent runtimes' to see available runtimes.`);

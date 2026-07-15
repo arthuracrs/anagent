@@ -17,7 +17,7 @@ program
   .option('--system-prompt <text>', 'System prompt string')
   .option('--prompt-file <path>', 'Read system prompt from file')
   .option('--cwd <dir>', 'Working directory for the agent (default: current directory)')
-  .option('--runtime <id>', 'Runtime to use (default: claude-code)')
+  .option('--runtime <id>', 'Runtime to use (default: opencode)')
   .option('--mode <mode>', 'Execution mode: headless | tmux')
   .option('--timeout <seconds>', 'Timeout in seconds (default: 600)')
   .action(async (inputArg: string | undefined, opts: { stdin?: boolean; json?: boolean; systemPrompt?: string; promptFile?: string; cwd?: string; runtime?: string; mode?: string; timeout?: string }) => {

@@ -6,7 +6,7 @@ export async function runAgent(
   input: string,
   opts: { systemPrompt?: string; runtime?: string; mode?: 'headless' | 'tmux'; cwd?: string } = {},
 ): Promise<string> {
-  const runtimeId = opts.runtime ?? process.env.ANAGENT_RUNTIME ?? 'claude-code'
+  const runtimeId = opts.runtime ?? process.env.ANAGENT_RUNTIME ?? 'opencode'
   const runtime = getRuntime(runtimeId)
   if (!runtime) throw new Error(`Unknown runtime: "${runtimeId}". Run 'anagent runtimes' to see available runtimes.`)
 
