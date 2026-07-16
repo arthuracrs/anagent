@@ -1,9 +1,15 @@
 import { spawnSync } from 'child_process'
 import type { RuntimeDefinition } from '../runtimes/base.js'
-import { createTempFiles, cleanupTempFiles } from './temp.js'
+import { createTempFiles, cleanupTempFiles, type ExecOpts } from './temp.js'
 
-export function runHeadlessSync(runtime: RuntimeDefinition, systemPrompt: string, input: string, cwd?: string): string {
-  const files = createTempFiles(systemPrompt, input, runtime.headlessSnippet)
+export function runHeadlessSync(
+  runtime: RuntimeDefinition,
+  systemPrompt: string,
+  input: string,
+  cwd?: string,
+  execOpts?: ExecOpts,
+): string {
+  const files = createTempFiles(systemPrompt, input, runtime.headlessSnippet, execOpts)
   try {
     const result = spawnSync(files.scriptPath, {
       stdio: ['ignore', 'pipe', 'pipe'],

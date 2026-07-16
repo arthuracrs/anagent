@@ -37,7 +37,15 @@ test('each runtime has required fields', () => {
   }
 })
 
-test('claude-code tmux snippet includes --session-id', () => {
+test('claude-code tmux snippet constructs --session-id/--resume from shell vars', () => {
   const rt = getRuntime('claude-code')!
+  assert.ok(rt.tmuxSnippet.includes('$RESUME'))
   assert.ok(rt.tmuxSnippet.includes('--session-id'))
+  assert.ok(rt.tmuxSnippet.includes('--resume'))
+})
+
+test('opencode snippet supports --session for resume', () => {
+  const rt = getRuntime('opencode')!
+  assert.ok(rt.headlessSnippet.includes('--session'))
+  assert.ok(rt.headlessSnippet.includes('$RESUME'))
 })

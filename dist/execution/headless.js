@@ -1,23 +1,18 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.streamHeadless = streamHeadless;
 const child_process_1 = require("child_process");
-const crypto_1 = __importDefault(require("crypto"));
 const temp_js_1 = require("./temp.js");
 const emitter_js_1 = require("../streaming/emitter.js");
 const normalizer_js_1 = require("../streaming/normalizer.js");
-function streamHeadless(runtime, systemPrompt, input, cwd) {
-    const sessionId = crypto_1.default.randomUUID();
+function streamHeadless(runtime, systemPrompt, input, cwd, execOpts) {
     const snippet = runtime.streamArgs
         ? runtime.headlessSnippet + ' ' + runtime.streamArgs
         : runtime.headlessSnippet;
-    const files = (0, temp_js_1.createTempFiles)(systemPrompt, input, snippet);
+    const files = (0, temp_js_1.createTempFiles)(systemPrompt, input, snippet, execOpts);
     const normalizer = (0, normalizer_js_1.createNormalizer)(runtime.normalizer);
     const startTime = Date.now();
-    (0, emitter_js_1.emit)({ type: 'start', runtime: runtime.id, mode: 'headless', sessionId });
+    (0, emitter_js_1.emit)({ type: 'start', runtime: runtime.id, mode: 'headless', sessionId: files.sessionId });
     return new Promise((resolve) => {
         const proc = (0, child_process_1.spawn)(files.scriptPath, {
             stdio: ['ignore', 'pipe', 'pipe'],

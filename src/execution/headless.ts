@@ -1,7 +1,6 @@
 import { spawn } from 'child_process'
-import crypto from 'crypto'
 import type { RuntimeDefinition } from '../runtimes/base.js'
-import { createTempFiles, cleanupTempFiles } from './temp.js'
+import { createTempFiles, cleanupTempFiles, type ExecOpts } from './temp.js'
 import { emit } from '../streaming/emitter.js'
 import { createNormalizer } from '../streaming/normalizer.js'
 
@@ -10,16 +9,16 @@ export function streamHeadless(
   systemPrompt: string,
   input: string,
   cwd?: string,
+  execOpts?: ExecOpts,
 ): Promise<void> {
-  const sessionId = crypto.randomUUID()
   const snippet = runtime.streamArgs
     ? runtime.headlessSnippet + ' ' + runtime.streamArgs
     : runtime.headlessSnippet
-  const files = createTempFiles(systemPrompt, input, snippet)
+  const files = createTempFiles(systemPrompt, input, snippet, execOpts)
   const normalizer = createNormalizer(runtime.normalizer)
   const startTime = Date.now()
 
-  emit({ type: 'start', runtime: runtime.id, mode: 'headless', sessionId })
+  emit({ type: 'start', runtime: runtime.id, mode: 'headless', sessionId: files.sessionId })
 
   return new Promise<void>((resolve) => {
     const proc = spawn(files.scriptPath, {

@@ -24,6 +24,9 @@ program
     .option('--runtime <id>', 'Runtime to use (default: opencode)')
     .option('--mode <mode>', 'Execution mode: headless | tmux')
     .option('--timeout <seconds>', 'Timeout in seconds (default: 600)')
+    .option('--resume <sessionId>', 'Resume an existing agent session by its id')
+    .option('--session-id <id>', 'Use an explicit session id instead of generating one')
+    .option('--mcp-config <path>', 'Path to an MCP server config file the agent should load')
     .action(async (inputArg, opts) => {
     try {
         if (opts.json && opts.stream) {
@@ -53,10 +56,27 @@ program
         const cwd = opts.cwd ?? process.cwd();
         const mode = opts.mode;
         if (opts.stream) {
-            await (0, runner_js_1.runAgent)(input, { systemPrompt, runtime: opts.runtime, mode, cwd, stream: true });
+            await (0, runner_js_1.runAgent)(input, {
+                systemPrompt,
+                runtime: opts.runtime,
+                mode,
+                cwd,
+                stream: true,
+                resume: opts.resume,
+                sessionId: opts.sessionId,
+                mcpConfigPath: opts.mcpConfig,
+            });
         }
         else {
-            const output = await (0, runner_js_1.runAgent)(input, { systemPrompt, runtime: opts.runtime, mode, cwd });
+            const output = await (0, runner_js_1.runAgent)(input, {
+                systemPrompt,
+                runtime: opts.runtime,
+                mode,
+                cwd,
+                resume: opts.resume,
+                sessionId: opts.sessionId,
+                mcpConfigPath: opts.mcpConfig,
+            });
             if (opts.json) {
                 console.log(JSON.stringify({ output }));
             }

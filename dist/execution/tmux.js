@@ -12,12 +12,12 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 const DEFAULT_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
-async function runTmux(runtime, systemPrompt, input, cwd) {
+async function runTmux(runtime, systemPrompt, input, cwd, execOpts) {
     const timeoutMs = process.env.ANAGENT_TIMEOUT_SEC
         ? parseInt(process.env.ANAGENT_TIMEOUT_SEC, 10) * 1000
         : DEFAULT_TIMEOUT_MS;
     const deadline = Date.now() + timeoutMs;
-    const files = (0, temp_js_1.createTempFiles)(systemPrompt, input, runtime.tmuxSnippet);
+    const files = (0, temp_js_1.createTempFiles)(systemPrompt, input, runtime.tmuxSnippet, execOpts);
     const sessionName = `anagent-${files.id}`;
     try {
         const tmuxArgs = ['new-session', '-d', '-s', sessionName, '-x', '220', '-y', '50'];
@@ -61,12 +61,12 @@ async function runTmux(runtime, systemPrompt, input, cwd) {
         (0, temp_js_1.cleanupTempFiles)(files);
     }
 }
-async function streamTmux(runtime, systemPrompt, input, cwd) {
+async function streamTmux(runtime, systemPrompt, input, cwd, execOpts) {
     const timeoutMs = process.env.ANAGENT_TIMEOUT_SEC
         ? parseInt(process.env.ANAGENT_TIMEOUT_SEC, 10) * 1000
         : DEFAULT_TIMEOUT_MS;
     const deadline = Date.now() + timeoutMs;
-    const files = (0, temp_js_1.createTempFiles)(systemPrompt, input, runtime.tmuxSnippet);
+    const files = (0, temp_js_1.createTempFiles)(systemPrompt, input, runtime.tmuxSnippet, execOpts);
     const sessionName = `anagent-${files.id}`;
     (0, emitter_js_1.emit)({ type: 'start', runtime: runtime.id, mode: 'tmux', sessionId: files.sessionId, tmuxSession: sessionName });
     console.log(`tmux attach -t ${sessionName}`);

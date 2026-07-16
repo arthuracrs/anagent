@@ -1,7 +1,7 @@
 import { execFile } from 'child_process'
 import { promisify } from 'util'
 import type { RuntimeDefinition } from '../runtimes/base.js'
-import { createTempFiles, cleanupTempFiles } from './temp.js'
+import { createTempFiles, cleanupTempFiles, type ExecOpts } from './temp.js'
 import { readSessionOutput } from './jsonl.js'
 import { emit } from '../streaming/emitter.js'
 
@@ -13,13 +13,19 @@ function sleep(ms: number): Promise<void> {
 
 const DEFAULT_TIMEOUT_MS = 10 * 60 * 1000 // 10 minutes
 
-export async function runTmux(runtime: RuntimeDefinition, systemPrompt: string, input: string, cwd?: string): Promise<string> {
+export async function runTmux(
+  runtime: RuntimeDefinition,
+  systemPrompt: string,
+  input: string,
+  cwd?: string,
+  execOpts?: ExecOpts,
+): Promise<string> {
   const timeoutMs = process.env.ANAGENT_TIMEOUT_SEC
     ? parseInt(process.env.ANAGENT_TIMEOUT_SEC, 10) * 1000
     : DEFAULT_TIMEOUT_MS
   const deadline = Date.now() + timeoutMs
 
-  const files = createTempFiles(systemPrompt, input, runtime.tmuxSnippet)
+  const files = createTempFiles(systemPrompt, input, runtime.tmuxSnippet, execOpts)
   const sessionName = `anagent-${files.id}`
   try {
     const tmuxArgs = ['new-session', '-d', '-s', sessionName, '-x', '220', '-y', '50']
@@ -62,13 +68,19 @@ export async function runTmux(runtime: RuntimeDefinition, systemPrompt: string, 
   }
 }
 
-export async function streamTmux(runtime: RuntimeDefinition, systemPrompt: string, input: string, cwd?: string): Promise<void> {
+export async function streamTmux(
+  runtime: RuntimeDefinition,
+  systemPrompt: string,
+  input: string,
+  cwd?: string,
+  execOpts?: ExecOpts,
+): Promise<void> {
   const timeoutMs = process.env.ANAGENT_TIMEOUT_SEC
     ? parseInt(process.env.ANAGENT_TIMEOUT_SEC, 10) * 1000
     : DEFAULT_TIMEOUT_MS
   const deadline = Date.now() + timeoutMs
 
-  const files = createTempFiles(systemPrompt, input, runtime.tmuxSnippet)
+  const files = createTempFiles(systemPrompt, input, runtime.tmuxSnippet, execOpts)
   const sessionName = `anagent-${files.id}`
 
   emit({ type: 'start', runtime: runtime.id, mode: 'tmux', sessionId: files.sessionId, tmuxSession: sessionName })

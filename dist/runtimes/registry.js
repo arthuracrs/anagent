@@ -7,8 +7,8 @@ const claudeCode = {
     name: 'Claude Code',
     description: 'Anthropic Claude Code CLI',
     defaultMode: 'tmux',
-    headlessSnippet: 'claude --dangerously-skip-permissions --system-prompt "$SYSPROMPT" -p "$INPUT"',
-    tmuxSnippet: 'claude --dangerously-skip-permissions --system-prompt "$SYSPROMPT" --session-id "$SESSION_ID" "$INPUT"',
+    headlessSnippet: 'claude --dangerously-skip-permissions --system-prompt "$SYSPROMPT" -p "$INPUT" $([ -n "$RESUME" ] && echo "--resume $RESUME") $([ -n "$MCP_CONFIG" ] && echo "--mcp-config $MCP_CONFIG")',
+    tmuxSnippet: 'claude --dangerously-skip-permissions --system-prompt "$SYSPROMPT" $([ -z "$RESUME" ] && echo "--session-id $SESSION_ID") "$INPUT" $([ -n "$RESUME" ] && echo "--resume $RESUME") $([ -n "$MCP_CONFIG" ] && echo "--mcp-config $MCP_CONFIG")',
     normalizer: 'claude-code',
     streamArgs: '--output-format stream-json --verbose --include-partial-messages',
 };
@@ -27,8 +27,8 @@ const opencode = {
     name: 'OpenCode',
     description: 'OpenCode AI coding agent CLI',
     defaultMode: 'headless',
-    headlessSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nopencode run --auto "$FULL"',
-    tmuxSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nopencode run --auto "$FULL"',
+    headlessSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nopencode run --auto "$FULL" $([ -n "$RESUME" ] && echo "--session $RESUME")',
+    tmuxSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nopencode run --auto "$FULL" $([ -n "$RESUME" ] && echo "--session $RESUME")',
     normalizer: 'opencode',
     streamArgs: '--format json',
 };
