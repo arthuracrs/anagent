@@ -17,7 +17,7 @@ async function runAgent(input, opts = {}) {
             await (0, headless_js_1.streamHeadless)(runtime, systemPrompt, input, opts.cwd);
         }
         else {
-            throw new Error('Streaming in tmux mode is not yet implemented. Use --mode headless or omit --stream.');
+            await (0, tmux_js_1.streamTmux)(runtime, systemPrompt, input, opts.cwd);
         }
         return;
     }

@@ -1,7 +1,7 @@
 import { getRuntime } from './runtimes/registry.js'
 import { runHeadlessSync } from './execution/headless-sync.js'
 import { streamHeadless } from './execution/headless.js'
-import { runTmux } from './execution/tmux.js'
+import { runTmux, streamTmux } from './execution/tmux.js'
 
 export async function runAgent(
   input: string,
@@ -18,7 +18,7 @@ export async function runAgent(
     if (mode === 'headless') {
       await streamHeadless(runtime, systemPrompt, input, opts.cwd)
     } else {
-      throw new Error('Streaming in tmux mode is not yet implemented. Use --mode headless or omit --stream.')
+      await streamTmux(runtime, systemPrompt, input, opts.cwd)
     }
     return
   }
