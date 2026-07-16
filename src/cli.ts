@@ -14,14 +14,20 @@ program
   .description('Run an agent with the given input')
   .option('--stdin', 'Read input from stdin instead of argument')
   .option('--json', 'Output result as JSON')
+  .option('--stream', 'Emit NDJSON events on stdout for programmatic consumption')
   .option('--system-prompt <text>', 'System prompt string')
   .option('--prompt-file <path>', 'Read system prompt from file')
   .option('--cwd <dir>', 'Working directory for the agent (default: current directory)')
   .option('--runtime <id>', 'Runtime to use (default: opencode)')
   .option('--mode <mode>', 'Execution mode: headless | tmux')
   .option('--timeout <seconds>', 'Timeout in seconds (default: 600)')
-  .action(async (inputArg: string | undefined, opts: { stdin?: boolean; json?: boolean; systemPrompt?: string; promptFile?: string; cwd?: string; runtime?: string; mode?: string; timeout?: string }) => {
+  .action(async (inputArg: string | undefined, opts: { stdin?: boolean; json?: boolean; stream?: boolean; systemPrompt?: string; promptFile?: string; cwd?: string; runtime?: string; mode?: string; timeout?: string }) => {
     try {
+      if (opts.json && opts.stream) {
+        console.error('Error: --json and --stream are mutually exclusive')
+        process.exit(2)
+      }
+
       let input: string
       if (opts.stdin) {
         input = await readStdin()
@@ -42,12 +48,16 @@ program
       if (opts.timeout) process.env.ANAGENT_TIMEOUT_SEC = opts.timeout
       const cwd = opts.cwd ?? process.cwd()
       const mode = opts.mode as 'headless' | 'tmux' | undefined
-      const output = await runAgent(input, { systemPrompt, runtime: opts.runtime, mode, cwd })
 
-      if (opts.json) {
-        console.log(JSON.stringify({ output }))
+      if (opts.stream) {
+        await runAgent(input, { systemPrompt, runtime: opts.runtime, mode, cwd, stream: true })
       } else {
-        console.log(output)
+        const output = await runAgent(input, { systemPrompt, runtime: opts.runtime, mode, cwd })
+        if (opts.json) {
+          console.log(JSON.stringify({ output }))
+        } else {
+          console.log(output)
+        }
       }
     } catch (err) {
       console.error(`Error: ${(err as Error).message}`)
@@ -58,9 +68,15 @@ program
 program
   .command('runtimes')
   .description('List available runtimes')
-  .action(() => {
-    for (const rt of listRuntimes()) {
-      console.log(`  ${rt.id.padEnd(16)} ${rt.name.padEnd(16)} default: ${rt.defaultMode}  — ${rt.description}`)
+  .option('--json', 'Output as JSON array')
+  .action((opts: { json?: boolean }) => {
+    const runtimes = listRuntimes()
+    if (opts.json) {
+      console.log(JSON.stringify(runtimes))
+    } else {
+      for (const rt of runtimes) {
+        console.log(`  ${rt.id.padEnd(16)} ${rt.name.padEnd(16)} default: ${rt.defaultMode.padEnd(8)} — ${rt.description}`)
+      }
     }
   })
 

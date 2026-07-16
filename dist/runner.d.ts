@@ -3,4 +3,5 @@ export declare function runAgent(input: string, opts?: {
     runtime?: string;
     mode?: 'headless' | 'tmux';
     cwd?: string;
-}): Promise<string>;
+    stream?: boolean;
+}): Promise<string | void>;

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.runAgent = runAgent;
 const registry_js_1 = require("./runtimes/registry.js");
+const headless_sync_js_1 = require("./execution/headless-sync.js");
 const headless_js_1 = require("./execution/headless.js");
 const tmux_js_1 = require("./execution/tmux.js");
 async function runAgent(input, opts = {}) {
@@ -11,7 +12,16 @@ async function runAgent(input, opts = {}) {
         throw new Error(`Unknown runtime: "${runtimeId}". Run 'anagent runtimes' to see available runtimes.`);
     const mode = opts.mode ?? runtime.defaultMode;
     const systemPrompt = opts.systemPrompt ?? '';
+    if (opts.stream) {
+        if (mode === 'headless') {
+            await (0, headless_js_1.streamHeadless)(runtime, systemPrompt, input, opts.cwd);
+        }
+        else {
+            throw new Error('Streaming in tmux mode is not yet implemented. Use --mode headless or omit --stream.');
+        }
+        return;
+    }
     return mode === 'headless'
-        ? (0, headless_js_1.runHeadless)(runtime, systemPrompt, input, opts.cwd)
+        ? (0, headless_sync_js_1.runHeadlessSync)(runtime, systemPrompt, input, opts.cwd)
         : (0, tmux_js_1.runTmux)(runtime, systemPrompt, input, opts.cwd);
 }

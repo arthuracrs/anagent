@@ -1,20 +1,57 @@
-import { spawnSync } from 'child_process'
+import { spawn } from 'child_process'
+import crypto from 'crypto'
 import type { RuntimeDefinition } from '../runtimes/base.js'
 import { createTempFiles, cleanupTempFiles } from './temp.js'
+import { emit } from '../streaming/emitter.js'
+import { createNormalizer } from '../streaming/normalizer.js'
 
-export function runHeadless(runtime: RuntimeDefinition, systemPrompt: string, input: string, cwd?: string): string {
-  const files = createTempFiles(systemPrompt, input, runtime.headlessSnippet)
-  try {
-    const result = spawnSync(files.scriptPath, {
+export function streamHeadless(
+  runtime: RuntimeDefinition,
+  systemPrompt: string,
+  input: string,
+  cwd?: string,
+): Promise<void> {
+  const sessionId = crypto.randomUUID()
+  const snippet = runtime.streamArgs
+    ? runtime.headlessSnippet + ' ' + runtime.streamArgs
+    : runtime.headlessSnippet
+  const files = createTempFiles(systemPrompt, input, snippet)
+  const normalizer = createNormalizer(runtime.normalizer)
+  const startTime = Date.now()
+
+  emit({ type: 'start', runtime: runtime.id, mode: 'headless', sessionId })
+
+  return new Promise<void>((resolve) => {
+    const proc = spawn(files.scriptPath, {
       stdio: ['ignore', 'pipe', 'pipe'],
       cwd,
     })
-    if (result.status !== 0) {
-      const stderr = result.stderr?.toString().trim() ?? ''
-      throw new Error(`Agent process exited with code ${result.status}${stderr ? `: ${stderr}` : ''}`)
-    }
-    return result.stdout.toString().trim()
-  } finally {
-    cleanupTempFiles(files)
-  }
+
+    proc.stdout?.on('data', (data: Buffer) => {
+      const chunk = data.toString()
+      for (const event of normalizer.process(chunk)) emit(event)
+    })
+
+    proc.stderr?.on('data', (data: Buffer) => {
+      const chunk = data.toString()
+      for (const event of normalizer.process(chunk)) emit(event)
+    })
+
+    proc.on('close', (code) => {
+      const exitCode = code ?? -1
+      const elapsed = Date.now() - startTime
+      for (const event of normalizer.finish(exitCode)) {
+        if (event.type === 'done') emit({ ...event, durationMs: elapsed })
+        else if (event.type === 'failed') emit({ ...event, durationMs: elapsed })
+      }
+      cleanupTempFiles(files)
+      resolve()
+    })
+
+    proc.on('error', (err) => {
+      emit({ type: 'failed', error: err.message, exitCode: -1, durationMs: Date.now() - startTime })
+      cleanupTempFiles(files)
+      resolve()
+    })
+  })
 }

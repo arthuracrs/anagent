@@ -7,6 +7,8 @@ const claudeCode: RuntimeDefinition = {
   defaultMode: 'tmux',
   headlessSnippet: 'claude --dangerously-skip-permissions --system-prompt "$SYSPROMPT" -p "$INPUT"',
   tmuxSnippet: 'claude --dangerously-skip-permissions --system-prompt "$SYSPROMPT" --session-id "$SESSION_ID" "$INPUT"',
+  normalizer: 'claude-code',
+  streamArgs: '--output-format stream-json --verbose --include-partial-messages',
 }
 
 const cursor: RuntimeDefinition = {
@@ -16,6 +18,8 @@ const cursor: RuntimeDefinition = {
   defaultMode: 'headless',
   headlessSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nagent -p --force "$FULL"',
   tmuxSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nagent --force "$FULL"',
+  normalizer: 'passthrough',
+  streamArgs: '',
 }
 
 const opencode: RuntimeDefinition = {
@@ -25,6 +29,8 @@ const opencode: RuntimeDefinition = {
   defaultMode: 'headless',
   headlessSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nopencode run --auto "$FULL"',
   tmuxSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nopencode run --auto "$FULL"',
+  normalizer: 'passthrough',
+  streamArgs: '',
 }
 
 const RUNTIMES: RuntimeDefinition[] = [claudeCode, cursor, opencode]

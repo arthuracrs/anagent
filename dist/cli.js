@@ -17,6 +17,7 @@ program
     .description('Run an agent with the given input')
     .option('--stdin', 'Read input from stdin instead of argument')
     .option('--json', 'Output result as JSON')
+    .option('--stream', 'Emit NDJSON events on stdout for programmatic consumption')
     .option('--system-prompt <text>', 'System prompt string')
     .option('--prompt-file <path>', 'Read system prompt from file')
     .option('--cwd <dir>', 'Working directory for the agent (default: current directory)')
@@ -25,6 +26,10 @@ program
     .option('--timeout <seconds>', 'Timeout in seconds (default: 600)')
     .action(async (inputArg, opts) => {
     try {
+        if (opts.json && opts.stream) {
+            console.error('Error: --json and --stream are mutually exclusive');
+            process.exit(2);
+        }
         let input;
         if (opts.stdin) {
             input = await readStdin();
@@ -47,12 +52,17 @@ program
             process.env.ANAGENT_TIMEOUT_SEC = opts.timeout;
         const cwd = opts.cwd ?? process.cwd();
         const mode = opts.mode;
-        const output = await (0, runner_js_1.runAgent)(input, { systemPrompt, runtime: opts.runtime, mode, cwd });
-        if (opts.json) {
-            console.log(JSON.stringify({ output }));
+        if (opts.stream) {
+            await (0, runner_js_1.runAgent)(input, { systemPrompt, runtime: opts.runtime, mode, cwd, stream: true });
         }
         else {
-            console.log(output);
+            const output = await (0, runner_js_1.runAgent)(input, { systemPrompt, runtime: opts.runtime, mode, cwd });
+            if (opts.json) {
+                console.log(JSON.stringify({ output }));
+            }
+            else {
+                console.log(output);
+            }
         }
     }
     catch (err) {
@@ -63,9 +73,16 @@ program
 program
     .command('runtimes')
     .description('List available runtimes')
-    .action(() => {
-    for (const rt of (0, registry_js_1.listRuntimes)()) {
-        console.log(`  ${rt.id.padEnd(16)} ${rt.name.padEnd(16)} default: ${rt.defaultMode}  — ${rt.description}`);
+    .option('--json', 'Output as JSON array')
+    .action((opts) => {
+    const runtimes = (0, registry_js_1.listRuntimes)();
+    if (opts.json) {
+        console.log(JSON.stringify(runtimes));
+    }
+    else {
+        for (const rt of runtimes) {
+            console.log(`  ${rt.id.padEnd(16)} ${rt.name.padEnd(16)} default: ${rt.defaultMode.padEnd(8)} — ${rt.description}`);
+        }
     }
 });
 program.parse();

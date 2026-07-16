@@ -1,2 +1,2 @@
 import type { RuntimeDefinition } from '../runtimes/base.js';
-export declare function runHeadless(runtime: RuntimeDefinition, systemPrompt: string, input: string, cwd?: string): string;
+export declare function streamHeadless(runtime: RuntimeDefinition, systemPrompt: string, input: string, cwd?: string): Promise<void>;
