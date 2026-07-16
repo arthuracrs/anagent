@@ -26,9 +26,13 @@ export class PassthroughNormalizer implements Normalizer {
 }
 
 export function createNormalizer(id: string): Normalizer {
-  if (id === 'claude-code') {
+  if (id === 'claude-code' || id === 'cursor') {
     const { ClaudeCodeNormalizer } = require('./claude-code.js')
     return new ClaudeCodeNormalizer()
+  }
+  if (id === 'opencode') {
+    const { OpenCodeNormalizer } = require('./opencode.js')
+    return new OpenCodeNormalizer()
   }
   return new PassthroughNormalizer()
 }

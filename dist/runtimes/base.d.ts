@@ -1,4 +1,4 @@
-export type NormalizerId = 'claude-code' | 'cursor' | 'passthrough';
+export type NormalizerId = 'claude-code' | 'cursor' | 'opencode' | 'passthrough';
 export interface RuntimeDefinition {
     id: string;
     name: string;

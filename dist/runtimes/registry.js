@@ -19,8 +19,8 @@ const cursor = {
     defaultMode: 'headless',
     headlessSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nagent -p --force "$FULL"',
     tmuxSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nagent --force "$FULL"',
-    normalizer: 'passthrough',
-    streamArgs: '',
+    normalizer: 'cursor',
+    streamArgs: '--output-format stream-json --stream-partial-output',
 };
 const opencode = {
     id: 'opencode',
@@ -29,8 +29,8 @@ const opencode = {
     defaultMode: 'headless',
     headlessSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nopencode run --auto "$FULL"',
     tmuxSnippet: 'FULL="$SYSPROMPT\n\n$INPUT"\nopencode run --auto "$FULL"',
-    normalizer: 'passthrough',
-    streamArgs: '',
+    normalizer: 'opencode',
+    streamArgs: '--format json',
 };
 const RUNTIMES = [claudeCode, cursor, opencode];
 function getRuntime(id) {
