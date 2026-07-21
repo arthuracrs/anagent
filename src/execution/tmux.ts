@@ -28,10 +28,12 @@ export async function runTmux(
   const files = createTempFiles(systemPrompt, input, runtime.tmuxSnippet, execOpts)
   const sessionName = `anagent-${files.id}`
   try {
+    await execFileAsync('tmux', ['set-option', '-g', 'remain-on-exit', 'on'])
     const tmuxArgs = ['new-session', '-d', '-s', sessionName, '-x', '220', '-y', '50']
     if (cwd) tmuxArgs.push('-c', cwd)
     tmuxArgs.push(files.scriptPath)
     await execFileAsync('tmux', tmuxArgs)
+    await execFileAsync('tmux', ['set-option', '-g', 'remain-on-exit', 'off'])
     await execFileAsync('tmux', ['set-option', '-t', sessionName, 'remain-on-exit', 'on'])
     console.log(`tmux attach -t ${sessionName}`)
 
@@ -87,10 +89,12 @@ export async function streamTmux(
   console.log(`tmux attach -t ${sessionName}`)
 
   try {
+    await execFileAsync('tmux', ['set-option', '-g', 'remain-on-exit', 'on'])
     const tmuxArgs = ['new-session', '-d', '-s', sessionName, '-x', '220', '-y', '50']
     if (cwd) tmuxArgs.push('-c', cwd)
     tmuxArgs.push(files.scriptPath)
     await execFileAsync('tmux', tmuxArgs)
+    await execFileAsync('tmux', ['set-option', '-g', 'remain-on-exit', 'off'])
     await execFileAsync('tmux', ['set-option', '-t', sessionName, 'remain-on-exit', 'on'])
 
     while (Date.now() < deadline) {
