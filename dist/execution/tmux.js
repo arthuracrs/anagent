@@ -55,7 +55,7 @@ async function runTmux(runtime, systemPrompt, input, cwd, execOpts) {
     }
     finally {
         try {
-            await execFileAsync('tmux', ['kill-session', '-t', sessionName]);
+            await execFileAsync('tmux', ['set-option', '-t', sessionName, 'remain-on-exit', 'on']);
         }
         catch { /* already dead */ }
         (0, temp_js_1.cleanupTempFiles)(files);
@@ -142,9 +142,9 @@ async function streamTmux(runtime, systemPrompt, input, cwd, execOpts) {
     }
     finally {
         try {
-            await execFileAsync('tmux', ['kill-session', '-t', sessionName]);
+            await execFileAsync('tmux', ['set-option', '-t', sessionName, 'remain-on-exit', 'on']);
         }
-        catch { /* already dead */ }
+        catch { /* ok */ }
         (0, temp_js_1.cleanupTempFiles)(files);
     }
 }

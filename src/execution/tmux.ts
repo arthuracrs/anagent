@@ -63,7 +63,7 @@ export async function runTmux(
       .join('\n')
       .trim()
   } finally {
-    try { await execFileAsync('tmux', ['kill-session', '-t', sessionName]) } catch { /* already dead */ }
+    try { await execFileAsync('tmux', ['set-option', '-t', sessionName, 'remain-on-exit', 'on']) } catch { /* already dead */ }
     cleanupTempFiles(files)
   }
 }
@@ -157,7 +157,7 @@ export async function streamTmux(
   } catch (err) {
     emit({ type: 'failed', error: (err as Error).message, exitCode: -1 })
   } finally {
-    try { await execFileAsync('tmux', ['kill-session', '-t', sessionName]) } catch { /* already dead */ }
+    try { await execFileAsync('tmux', ['set-option', '-t', sessionName, 'remain-on-exit', 'on']) } catch { /* ok */ }
     cleanupTempFiles(files)
   }
 }
